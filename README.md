@@ -1,18 +1,15 @@
-scale-annotate-demo
+Scale Annotation Demo
 ====
-this app demos what [Scale API's](https://www.scaleapi.com) annotation feature can do
+![alt text](http://i.imgur.com/OUFQvBg.png "Demo Screenshot")
+This app demonstrates what [Scale API's](https://www.scaleapi.com) [annotation endpoint (bounding box)](https://blog.scaleapi.com/introducing-our-bounding-box-endpoint-7f2b1d07f7a7) can do.
 
-## structure
-### rails backend
-- [AnnotationRequestsController](app/controllers/api/annotation_requests_controller.rb) - handles API calls for the showing and creation of annotation requests
-- [CallbackController](app/controllers/callback_controller.rb) - handles Scale's callback
-- [ScaleHelper](app/helpers/scale_helper.rb) - sends Scale API calls
-- [models](app/models) - application models
-- [migrations](db/migrate) - model migrations
+You can deploy it to Heroku yourself following the instructions below, and feel free to build on top of it to build your own image recognition applications.
 
-### angular frontend
-- [application.js.erb](app/assets/javascripts/application.js.erb) - main angular js
-- [templates](app/assets/javascripts/templates) - angular templates
+Scale is currently hosting [our own demo here](https://annotate-demo.scaleapi.com). Play around with it to understand what our API can do.
+
+Discuss it with us on Scale's Slack channel!
+
+<img src="http://scalesupport.herokuapp.com/badge.svg">
 
 ## deploy on heroku
 1. create an [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/gsg/CreatingABucket.html)
@@ -28,3 +25,15 @@ this app demos what [Scale API's](https://www.scaleapi.com) annotation feature c
 5. `rake db:migrate`
 6. set environment variables as specified in [secrets.yml](config/secrets.yml) possibly with [dotenv](https://github.com/bkeepers/dotenv)
 7. `rails s`
+
+## structure
+### rails backend
+- [AnnotationRequestsController](app/controllers/api/annotation_requests_controller.rb) - handles API calls for the showing and creation of annotation requests
+- [CallbackController](app/controllers/callback_controller.rb) - handles Scale's callback
+- [ScaleHelper](app/helpers/scale_helper.rb) - sends Scale API calls
+- [models](app/models) - application models
+- [migrations](db/migrate) - model migrations
+
+### angular frontend
+- [application.js.erb](app/assets/javascripts/application.js.erb) - main angular js
+- [templates](app/assets/javascripts/templates) - angular templates
