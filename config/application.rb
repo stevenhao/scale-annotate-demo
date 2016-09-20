@@ -24,7 +24,8 @@ module ScaleAnnotateDemo
           access_key_id: Rails.application.secrets.s3_access_key_id,
           secret_access_key: Rails.application.secrets.s3_secret_access_key,
           s3_region: Rails.application.secrets.s3_region,
-        }
+        },
+	s3_protocol: :https
       }
     end
 
