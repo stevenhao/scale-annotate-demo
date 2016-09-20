@@ -9,7 +9,7 @@ Scale is currently hosting [our own demo here](https://annotate-demo.scaleapi.co
 
 Discuss it with us on Scale's Slack channel!
 
-<img src="http://scalesupport.herokuapp.com/badge.svg">
+[<img src="http://scalesupport.herokuapp.com/badge.svg">](https://scalesupport.herokuapp.com)
 
 ## deploy on heroku
 1. create an [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/gsg/CreatingABucket.html)
