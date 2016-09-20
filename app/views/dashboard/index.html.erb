@@ -1,9 +1,9 @@
 <div class="container" ng-app="scale-annotate-demo">
-  <h1>scale-annotate-demo</h1>
+  <h1>Scale Annotation Demo</h1>
   <ui-view></ui-view>
 </div>
 <script type="text/javascript">
 var app = angular.module('scale-annotate-demo');
 app.constant('RECAPTCHA_PUB', "<%= Rails.application.secrets.captcha_site_key %>");
-app.constant('POLL_DELAY', 2000);
+app.constant('POLL_DELAY', 4000);
 </script>
