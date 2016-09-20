@@ -1,0 +1,170 @@
+// This is a manifest file that'll be compiled into application.js, which will include all the files
+// listed below.
+//
+// Any JavaScript/Coffee file within this directory, lib/assets/javascripts, vendor/assets/javascripts,
+// or any plugin's vendor/assets/javascripts directory can be referenced here using a relative path.
+//
+// It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
+// compiled file. JavaScript code in this file should be added after the last require_* statement.
+//
+// Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
+// about supported directives.
+//
+//= require angular/angular
+//= require angular-rails-templates
+//= require angular-ui-router/release/angular-ui-router
+//= require ng-file-upload/ng-file-upload
+//= require angular-resource/angular-resource
+//= require angular-recaptcha/release/angular-recaptcha
+// require_tree .
+//= require_tree ./templates
+
+var app = angular.module('scale-annotate-demo', ['ui.router', 'ngFileUpload', 'ngResource', 'vcRecaptcha', 'templates']);
+
+app.constant('POLL_DELAY', 2000);
+app.constant('RECAPTCHA_PUB', "<%= Rails.application.secrets.captcha_site_key %>");
+
+app.service('AnnotationRequest', ['$resource', function($resource) {
+  return $resource('/api/annotation_requests/:id', { id: '@id' });
+}]);
+
+app.directive('imageonload', function() {
+  return {
+    restrict: 'A',
+    link: function(scope, element, attrs) {
+      element.bind('load', function(e) {
+        scope.$event = e;
+        scope.$apply(attrs.imageonload);
+      });
+    }
+  };
+});
+
+app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+  $stateProvider.state('welcome', {
+    url: '/',
+    templateUrl: "welcome.html",
+    controller: ['$scope', '$state', 'Upload', 'RECAPTCHA_PUB', function($scope, $state, Upload, RECAPTCHA_PUB) {
+      $scope.RECAPTCHA_PUB = RECAPTCHA_PUB;
+      $scope.labels = [];
+      $scope.add_label = function() {
+        var label = $scope.clabel.trim();
+        if($scope.labels.indexOf(label) === -1 && label.length > 0) {
+          $scope.labels.push(label);
+        }
+        $scope.clabel = "";
+      };
+      $scope.remove_label = function(label) {
+        $scope.labels = $scope.labels.filter(function(x) { return x != label; });
+      };
+      $scope.uploading = false;
+      $scope.submit = function() {
+        $scope.uploading = true;
+        $scope.upload();
+      };
+      $scope.upload = function() {
+        Upload.upload({
+          url: '/api/annotation_requests',
+          data: {image: $scope.image, labels: $scope.labels, captcha: $scope.recaptcha},
+          arrayKey: '[]'
+        }).then(function(resp) {
+          var annotationRequest = resp.data;
+          $state.go('scaling', { annotationRequest:  annotationRequest, id: annotationRequest.id });
+          $scope.uploading = false;
+        }, function(resp) {
+          if(resp.data.error) {
+            $scope.errors = resp.data.error;
+          } else {
+            $scope.errors = { image: [ "Upload failed... try a different image"] };
+          }
+          grecaptcha.reset();
+          $scope.uploading = false;
+        });
+      };
+      try {
+        grecaptcha.reset();
+      } catch (e) {}
+    }]
+  });
+
+  $stateProvider.state('scaling', {
+    url: '/scaling/:id',
+    templateUrl: "scaling.html",
+    params: {
+      annotationRequest: null
+    },
+    resolve: {
+      annotationRequest: ['AnnotationRequest', '$stateParams', function(AnnotationRequest, $stateParams) {
+        if($stateParams.annotationRequest) return $stateParams.annotationRequest;
+        return AnnotationRequest.get({ id: $stateParams.id }).$promise;
+      }]
+    },
+    controller: ['annotationRequest', 'AnnotationRequest', '$state', '$scope', '$timeout', 'POLL_DELAY',
+                  function(annotationRequest, AnnotationRequest, $state, $scope, $timeout, POLL_DELAY) {
+      if(annotationRequest.annotation_response) {
+        $state.go('done', { annotationRequest: annotationRequest, id: annotationRequest.id});
+        return;
+      }
+      function check() {
+        AnnotationRequest.get({ id: annotationRequest.id }).$promise.then(function(request) {
+          if(request.annotation_response) {
+            $state.go('done', { id: request.id, annotationRequest: request });
+          } else {
+            if($state.is('scaling') && $state.params.id == annotationRequest.id) $timeout(check, POLL_DELAY);
+          }
+        }).catch(function() {
+          if($state.is('scaling') && $state.params.id == annotationRequest.id) $timeout(check, POLL_DELAY);
+        });
+      }
+      $timeout(check, POLL_DELAY);
+    }]
+  });
+
+  $stateProvider.state('done', {
+    url: '/annotated/:id',
+    params: {
+      annotationRequest: null
+    },
+    resolve: {
+      annotationRequest: ['AnnotationRequest', '$stateParams', function(AnnotationRequest, $stateParams) {
+        if($stateParams.annotationRequest) return $stateParams.annotationRequest;
+        return AnnotationRequest.get({ id: $stateParams.id }).$promise;
+      }]
+    },
+    templateUrl: "done.html",
+    controller: ['annotationRequest', '$state', '$scope', function(annotationRequest, $state, $scope) {
+      if(!annotationRequest.annotation_response) {
+        $state.go('scaling', { annotationRequest: annotationRequest, id: annotationRequest.id });
+        return;
+      }
+      $scope.annotationRequest = annotationRequest;
+      try {
+        var parsedResponse = JSON.parse(annotationRequest.annotation_response.api_response);
+        $scope.cleanApiResponse = JSON.stringify(parsedResponse, null, 2);
+        $scope.loaded = false;
+        $scope.imageloaded = function(e) {
+          if($scope.loaded) return;
+          $scope.loaded = true;
+          var image = e.target;
+          var canvas = document.createElement('canvas');
+          canvas.width = image.naturalWidth;
+          canvas.height = image.naturalHeight;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(image, 0, 0);
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = Math.ceil(Math.max(canvas.width, canvas.height)*1.0/500.0);
+          var annotations = parsedResponse.response.annotations;
+          for(var i = 0; i < annotations.length; i++) {
+            var annotation = annotations[i];
+            ctx.rect(annotation.left, annotation.top, annotation.width, annotation.height);
+            ctx.stroke();
+          }
+          image.src = canvas.toDataURL('image/png');
+          canvas.remove();
+        };
+      } catch (e) {}
+    }]
+  });
+
+  $urlRouterProvider.otherwise("/");
+}]);

@@ -1,0 +1,65 @@
+<h2>welcome!</h2>
+<p>
+  welcome to the scale-annotate demo,
+  please upload an image to try out our annotation service
+</p>
+<div class="row">
+  <div class="col-md-6">
+    <h3>the image</h3>
+    <p>
+      please select an image to annotate (max size 3MB)
+    </p>
+    <input type="file" ngf-select ng-model="image" ngf-pattern="'image/*'"
+           ngf-accept="'image/*'" ngf-max-size="3MB" />
+   <p ng-if"errors.image" style="color: red;">
+     {{ errors.image.join(', ') }}
+   </p>
+  </div>
+  <div class="col-md-6">
+    <h3>what to label</h3>
+    <div class="input-group" style="max-width: 300px;">
+      <input type="text" class="form-control" placeholder="add labels for..." ng-model="clabel"/>
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="button" ng-click="add_label()"><i class="glyphicon glyphicon-plus"></i></button>
+      </span>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width: 20px;">
+          </th>
+          <th>
+            object
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-if="labels.length == 0">
+          <td colspan="2" style="text-align: center; font-weight: bold;">
+            please add a label above
+          </td>
+        </tr>
+        <tr ng-repeat="label in labels">
+          <td>
+            <a href="#" ng-click="remove_label(label)"><i class="glyphicon glyphicon-trash" style="color: red;"></i></a>
+          </td>
+          <td>
+            {{ label }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p ng-if="errors.labels" style="color: red;">
+      {{ errors.labels.join(", ") }}
+    </p>
+  </div>
+</div>
+<div style="text-align: center;">
+  <div style="width: 304px; margin: 10px auto;">
+    <div vc-recaptcha key="RECAPTCHA_PUB" ng-model="recaptcha"></div>
+  </div>
+  <p ng-if="errors.captcha" style="color: red;">
+    {{ errors.captcha.join(", ") }}
+  </p>
+  <button ng-click="submit()" ng-disabled="uploading" class="btn btn-primary btn-lg"><i class="glyphicon glyphicon-pencil"></i> annotate my image</button>
+</div>

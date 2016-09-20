@@ -1,0 +1,65 @@
+{
+  "name": "scale-annotate-demo",
+  "description": "app to demo scale's annotate feature",
+  "keywords": [
+    "scale",
+    "api"
+  ],
+  "website": "https://scaleapi.com",
+  "repository": "https://github.com/scaleapi/scale-annotate-demo",
+  "logo": "https://www.scaleapi.com/client/img/logo-dark.png",
+  "success_url": "/",
+  "scripts": {
+    "postdeploy": "bundle exec rake db:migrate"
+  },
+  "env": {
+    "SECRET_KEY_BASE": {
+      "description": "rails secret key",
+      "generator": "secret"
+    },
+    "CAPTCHA_SITE_KEY": {
+      "description": "google recaptcha public key",
+      "value": ""
+    },
+    "CAPTCHA_SECRET_KEY": {
+      "description": "google recaptcha private key",
+      "value": ""
+    },
+    "SCALE_BASE_URL": {
+      "description": "scale base url",
+      "value": "https://api.scaleapi.com"
+    },
+    "SCALE_API_KEY": {
+      "description": "scale api key",
+      "value": ""
+    },
+    "SCALE_CALLBACK_KEY": {
+      "description": "scale callback key",
+      "value": ""
+    },
+    "BASE_URL": {
+      "description": "base url for callbacks (eg https://myapp.herokuapp.com)",
+      "value": ""
+    },
+    "S3_BUCKET": {
+      "description": "amazon s3 bucket",
+      "value": ""
+    },
+    "S3_ACCESS_KEY_ID": {
+      "description": "amazon s3 access key",
+      "value": ""
+    },
+    "S3_SECRET_ACCESS_KEY": {
+      "description": "amazon s3 secret key",
+      "value": ""
+    },
+    "S3_REGION": {
+      "description": "amazon s3 region",
+      "value": ""
+    }
+  },
+  "image": "heroku/ruby",
+  "addons": [
+    "heroku-postgresql"
+  ]
+}

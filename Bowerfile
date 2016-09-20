@@ -1,0 +1,6 @@
+asset 'angular'
+asset 'angular-ui-router'
+asset 'ng-file-upload'
+asset 'angular-resource'
+asset 'angular-recaptcha'
+asset 'bootstrap-sass-official'
