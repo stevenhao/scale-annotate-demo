@@ -1,8 +1,6 @@
 class AnnotationRequest < ApplicationRecord
   has_one :annotation_response
 
-  before_create :generate_random_id
-
   serialize :labels, Array
   validates_length_of :labels, :minimum => 1, :message => "needs at least one label"
 
@@ -13,10 +11,4 @@ class AnnotationRequest < ApplicationRecord
   validates_attachment_presence :image
   validates_attachment_content_type :image, content_type: /\Aimage\/.*\z/
   validates_attachment_size :image, less_than: 2.megabytes
-  
-  private
-
-  def generate_random_id
-    self.id = SecureRandom.uuid
-  end
 end
