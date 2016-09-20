@@ -22,7 +22,6 @@
 var app = angular.module('scale-annotate-demo', ['ui.router', 'ngFileUpload', 'ngResource', 'vcRecaptcha', 'templates']);
 
 app.constant('POLL_DELAY', 2000);
-app.constant('RECAPTCHA_PUB', "<%= Rails.application.secrets.captcha_site_key %>");
 
 app.service('AnnotationRequest', ['$resource', function($resource) {
   return $resource('/api/annotation_requests/:id', { id: '@id' });
