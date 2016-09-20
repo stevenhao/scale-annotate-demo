@@ -12,7 +12,7 @@
 
 ActiveRecord::Schema.define(version: 20160919194006) do
 
-  create_table "annotation_requests", force: :cascade do |t|
+  create_table "annotation_requests", id: nil, force: :cascade do |t|
     t.text     "labels"
     t.string   "image_file_name"
     t.string   "image_content_type"
@@ -21,6 +21,7 @@ ActiveRecord::Schema.define(version: 20160919194006) do
     t.string   "task_id"
     t.datetime "created_at",         null: false
     t.datetime "updated_at",         null: false
+    t.index ["id"], name: "sqlite_autoindex_annotation_requests_1", unique: true
     t.index ["task_id"], name: "index_annotation_requests_on_task_id"
   end
 
