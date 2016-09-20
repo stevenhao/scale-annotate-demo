@@ -7,6 +7,7 @@ module CaptchaHelper
       :response => captcha_response
       #:remoteip => remote_ip
     }
+    logger.info response.body
     return response.body['success']
   end
 
